@@ -11,6 +11,8 @@ from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QLineEdit,
 
 import random
 
+from sqlalchemy import func
+
 from infra.entities.apostas import Aposta
 from infra.repository.repository import ApostaRepository
 
@@ -44,9 +46,9 @@ class Ui_MainWindow(object):
         self.label_10 = QLabel(self.widget)
         self.label_10.setObjectName(u"label_10")
         self.label_10.setGeometry(QRect(40, 180, 161, 16))
-        self.lineEdit_5 = QLineEdit(self.widget)
-        self.lineEdit_5.setObjectName(u"lineEdit_5")
-        self.lineEdit_5.setGeometry(QRect(150, 370, 31, 21))
+        self.txt_resultado_time_casa = QLineEdit(self.widget)
+        self.txt_resultado_time_casa.setObjectName(u"lineEdit_5")
+        self.txt_resultado_time_casa.setGeometry(QRect(150, 370, 31, 21))
         self.label_13 = QLabel(self.widget)
         self.label_13.setObjectName(u"label_13")
         self.label_13.setGeometry(QRect(270, 330, 16, 16))
@@ -103,9 +105,9 @@ class Ui_MainWindow(object):
         self.label_18 = QLabel(self.widget)
         self.label_18.setObjectName(u"label_18")
         self.label_18.setGeometry(QRect(320, 370, 131, 31))
-        self.lineEdit_8 = QLineEdit(self.widget)
-        self.lineEdit_8.setObjectName(u"lineEdit_8")
-        self.lineEdit_8.setGeometry(QRect(270, 370, 31, 21))
+        self.txt_resultado_time_visitante = QLineEdit(self.widget)
+        self.txt_resultado_time_visitante.setObjectName(u"lineEdit_8")
+        self.txt_resultado_time_visitante.setGeometry(QRect(270, 370, 31, 21))
         self.label_19 = QLabel(self.widget)
         self.label_19.setObjectName(u"label_19")
         self.label_19.setGeometry(QRect(200, 150, 61, 51))
@@ -141,7 +143,7 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Nome", None));
         ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Apostas", None));
+        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Valor Aposta", None));
         ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
         ___qtablewidgetitem2.setText(QCoreApplication.translate("MainWindow", u"Premio", None));
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600; font-style:italic; color:#005500;\">BET-ADS</span></p></body></html>", None))
@@ -167,7 +169,7 @@ class Ui_MainWindow(object):
             valor_aposta=self.txt_valor_aposta.text().replace(',', '.'),
             vencedor=self.obter_time_selecionado(),
             placar=self.txt_placar_time_casa.text() + " x " + self.txt_placar_time_visitante.text(),
-            quantidade_apostadores=+1
+            premio=0
         )
 
         if self.btn_apostar.text() == 'Apostar':
@@ -183,7 +185,8 @@ class Ui_MainWindow(object):
                 msg.setIcon(QMessageBox.Information)
                 msg.setText('Aposta Realizada')
                 msg.exec()
-        self.limpar_campos()
+            self.limpar_campos()
+        self.qtdapostadores.setText(str(len(self.exibir_apostadores())))
 
     def obter_time_selecionado(self):
         button_group = QButtonGroup()
@@ -205,31 +208,41 @@ class Ui_MainWindow(object):
                 widget.setChecked(False)
 
     def gerar_placar(self):
-        gols_casa = random.randint(0, 5)
-        gols_visitante = random.randint(0, 5)
+        gols_casa = str(random.randint(0, 5))
+        gols_visitante = str(random.randint(0, 5))
 
-        placar = [
-            {"time": "Time da casa", "gols": gols_casa},
-            {"time": "Time Visitante", "gols": gols_visitante}
-        ]
+        self.txt_resultado_time_casa.setText(gols_casa)
+        self.txt_resultado_time_visitante.setText(gols_visitante)
+
+        placar = self.txt_resultado_time_casa.text() + " x " + self.txt_resultado_time_visitante.text()
 
         return placar
 
-    def exibir_placar(placar):
-        print("Placar final:")
-        for resultado in placar:
-            print(f"{resultado['time']}: {resultado['gols']}")
+    def exibir_apostadores(self):
+        db = ApostaRepository()
+        return db.select_all()
 
-    def validar_vencedor(placar):
-        if placar[0]['gols'] > placar[1]['gols']:
-            return placar[0]['time']
-        elif placar[1]['gols'] > placar[0]['gols']:
-            return placar[1]['time']
+    def validar_vencedor(self, placar):
+        db = ApostaRepository()
+        retorno = db.select_all()
+        aposta_ganhadora = str(placar).split("x")
+        time_casa= int(aposta_ganhadora[0])
+        time_visitante= int(aposta_ganhadora[1])
+
+        if time_casa > time_visitante:
+            vencedor = "Time Casa"
+        elif time_casa < time_visitante:
+            vencedor = "Time Visitante"
         else:
-            return "Empate"
+            vencedor = "Empate"
 
-    placar = gerar_placar(self=None)
-    exibir_placar(placar)
+        if retorno.vencedor == vencedor:
+            premio = retorno.valor_aposta * 1.5
+            return premio
+        elif retorno.placar == placar:
+            premio = retorno.valor_aposta * 2
+            return premio
 
-    ganhador = validar_vencedor(placar)
-    print(f"Vencedor: {ganhador} ganhou")
+
+
+
