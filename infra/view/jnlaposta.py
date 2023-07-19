@@ -224,9 +224,10 @@ class Ui_MainWindow(object):
         db = ApostaRepository()
         return db.select_all()
 
-    def validar_vencedor(self, placar):
+    def validar_vencedor(self):
         db = ApostaRepository()
         retorno = db.select_all()
+        placar = self.txt_resultado_time_casa.text() + " x " + self.txt_resultado_time_visitante.text()
         aposta_ganhadora = str(placar).split("x")
         time_casa= int(aposta_ganhadora[0])
         time_visitante= int(aposta_ganhadora[1])
@@ -238,13 +239,16 @@ class Ui_MainWindow(object):
         else:
             vencedor = "Empate"
 
-        if retorno.vencedor == vencedor:
-            premio = retorno.valor_aposta * 1.5
-            return premio
-        elif retorno.placar == placar:
-            premio = retorno.valor_aposta * 2
-            return premio
+        for apostas in retorno:
+            apostas = [retorno.placar, retorno.vencedor, retorno.valor_aposta]
+            if apostas.retorno.placar == placar:
+                premio = retorno.valor_aposta * 2
+                return premio
+            elif apostas.retorno.vencedor == vencedor:
+                premio = retorno.valor_aposta * 1.5
+                return premio
 
+        return None
 
 
 
