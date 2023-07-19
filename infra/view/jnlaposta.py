@@ -160,6 +160,8 @@ class Ui_MainWindow(object):
         self.container_jnlaposta = self.widget
         self.btn_apostar.clicked.connect(self.salvar_aposta)
         self.btn_resultado.clicked.connect(self.gerar_placar)
+        self.btn_resultado.clicked.connect(self.exibir_apostadores)
+        self.btn_resultado.clicked.connect(self.validar_vencedor)
 
     def salvar_aposta(self):
 

@@ -1,5 +1,4 @@
 from infra.configs.connection import DBConnectionHandler
-from infra.entities import apostas
 from infra.entities.apostas import Aposta
 
 
