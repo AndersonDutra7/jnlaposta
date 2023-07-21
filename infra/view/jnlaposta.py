@@ -210,14 +210,14 @@ class Ui_MainWindow(object):
                 widget.setChecked(False)
 
     def gerar_placar(self):
-        gols_casa = str(random.randint(0, 5))
-        gols_visitante = str(random.randint(0, 5))
+        gols_casa = str(random.randint(0, 2))
+        gols_visitante = str(random.randint(0, 2))
 
         self.txt_resultado_time_casa.setText(gols_casa)
         self.txt_resultado_time_visitante.setText(gols_visitante)
 
         placar = self.txt_resultado_time_casa.text() + " x " + self.txt_resultado_time_visitante.text()
-
+        self.qtdapostadores.setText(str(len(self.exibir_apostadores())))
         return placar
 
     def exibir_apostadores(self):
@@ -225,30 +225,39 @@ class Ui_MainWindow(object):
         return db.select_all()
 
     def validar_vencedor(self):
-        db = ApostaRepository()
-        retorno = db.select_all()
         placar = self.txt_resultado_time_casa.text() + " x " + self.txt_resultado_time_visitante.text()
         aposta_ganhadora = str(placar).split("x")
-        time_casa= int(aposta_ganhadora[0])
-        time_visitante= int(aposta_ganhadora[1])
+        time_casa = int(aposta_ganhadora[0])
+        time_visitante = int(aposta_ganhadora[1])
 
         if time_casa > time_visitante:
-            vencedor = "Time Casa"
+            ganhador = "Time Casa"
         elif time_casa < time_visitante:
-            vencedor = "Time Visitante"
+            ganhador = "Time Visitante"
         else:
-            vencedor = "Empate"
+            ganhador = "Empate"
 
-        for apostas in retorno:
-            apostas = [retorno.placar, retorno.vencedor, retorno.valor_aposta]
-            if apostas.retorno.placar == placar:
-                premio = retorno.valor_aposta * 2
-                return premio
-            elif apostas.retorno.vencedor == vencedor:
-                premio = retorno.valor_aposta * 1.5
-                return premio
+        db = ApostaRepository()
+        lista_apostas = db.select_all()
+        lista_ganhadores = []
 
-        return None
+        for aposta in lista_apostas:
+            placar_aposta = str(aposta.placar).split("x")
+            aposta_time_casa = int(placar_aposta[0])
+            aposta_time_visitante = int(placar_aposta[1])
+
+            if time_casa == aposta_time_casa and time_visitante == aposta_time_visitante:
+                aposta.premio = aposta.valor_aposta * 2
+                lista_ganhadores.append(aposta)
+            elif ganhador == aposta.vencedor:
+                aposta.premio = aposta.valor_aposta * 1.5
+                lista_ganhadores.append(aposta)
+            else:
+                self.label_3.setText(QCoreApplication.translate("MainWindow",
+                                                        u"<html><head/><body><p><span style=\" font-size:13pt; font-weight:600;\">Não houve ganhadores!!!</span></p></body></html>",
+                                                        None))
+        print(lista_ganhadores)
+
 
 
 

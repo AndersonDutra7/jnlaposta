@@ -12,4 +12,4 @@ class Aposta(Base):
     premio= Column(Float, nullable=False)
 
     def __repr__(self):
-        return f'Aposta = {self.id}, Apostador = {self.nome_apostador}, Valor da Aposta = {self.valor_aposta}, Vencedor = {self.valor_aposta}, Placar = {self.placar}, Prêmio = {self.premio}'
+        return f'Aposta = {self.id_aposta}, Apostador = {self.nome_apostador}, Valor da Aposta = {self.valor_aposta}, Vencedor = {self.vencedor}, Placar = {self.placar}, Prêmio = {self.premio}'
