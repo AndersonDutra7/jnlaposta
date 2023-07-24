@@ -162,6 +162,7 @@ class Ui_MainWindow(object):
         self.btn_resultado.clicked.connect(self.gerar_placar)
         self.btn_resultado.clicked.connect(self.exibir_apostadores)
         self.btn_resultado.clicked.connect(self.validar_vencedor)
+        self.btn_resultado.clicked.connect(self.popular_tabela_ganhadores)
 
     def salvar_aposta(self):
 
@@ -252,12 +253,25 @@ class Ui_MainWindow(object):
             elif ganhador == aposta.vencedor:
                 aposta.premio = aposta.valor_aposta * 1.5
                 lista_ganhadores.append(aposta)
-            else:
-                self.label_3.setText(QCoreApplication.translate("MainWindow",
+        return lista_ganhadores
+
+    def popular_tabela_ganhadores(self):
+        lista_ganhadores = self.validar_vencedor()
+
+        self.tableWidget.setRowCount(len(lista_ganhadores))
+
+        for row, aposta in enumerate(lista_ganhadores):
+            nome_apostador = aposta.nome_apostador
+            placar = aposta.placar
+            premio = f'{aposta.premio:.2f}'
+
+            self.tableWidget.setItem(row, 0, QTableWidgetItem(nome_apostador))
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(placar))
+            self.tableWidget.setItem(row, 2, QTableWidgetItem(str(premio)))
+
+        if lista_ganhadores is None:
+            self.label_3.setText(QCoreApplication.translate("MainWindow",
                                                         u"<html><head/><body><p><span style=\" font-size:13pt; font-weight:600;\">Não houve ganhadores!!!</span></p></body></html>",
                                                         None))
-        print(lista_ganhadores)
-
-
 
 
